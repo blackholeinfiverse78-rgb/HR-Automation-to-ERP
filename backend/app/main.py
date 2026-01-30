@@ -92,7 +92,8 @@ def recruiter_hire_candidate(req: ShortlistRequest):
 @app.post("/actions/debug/stuck-candidate")
 def debug_create_stuck_candidate(req: ShortlistRequest):
     from datetime import timedelta
-    old_time = datetime.utcnow() - timedelta(days=10)
+    # 4 days ago (triggers the 3-day Shortlist SLA)
+    old_time = datetime.utcnow() - timedelta(days=4)
     
     event = HREvent(
         event_id=str(uuid.uuid4()),
@@ -100,13 +101,14 @@ def debug_create_stuck_candidate(req: ShortlistRequest):
         tenant_id=req.tenant_id,
         entity_type="candidate",
         entity_id=req.candidate_id,
-        action="INTERVIEW_SCHEDULED",
+        action="SHORTLISTED",
         actor_id="SYSTEM_DEBUG",
         actor_role="DEBUG_SYSTEM",
         timestamp=old_time
     )
     save_hr_event(event) 
-    return {"status": "injected_old_event", "timestamp": str(old_time)}
+    return {"status": "injected_old_shortlisted_event", "timestamp": str(old_time)}
+
 
 # --- Read-Only Endpoints ---
 

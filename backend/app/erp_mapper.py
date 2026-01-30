@@ -56,7 +56,9 @@ def process_erp_sync():
         for e_dict in events:
             e = HREvent(**e_dict)
             if e.event_id in processed_event_ids:
+                print(f"   [IDEMPOTENCY] Event {e.event_id} already synced to ERP. Skipping.")
                 continue
+
                 
             generated_signals = map_event_to_erp(e)
             for sig in generated_signals:

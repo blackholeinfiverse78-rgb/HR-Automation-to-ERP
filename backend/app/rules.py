@@ -17,35 +17,47 @@ def check_stuck_candidates_for_tenant(tenant_id: str):
                 'time': datetime.fromisoformat(e['timestamp'])
             }
 
-    # SLA Rule: IF status == 'INTERVIEW_SCHEDULED' AND time > 7 days ago THEN Alert
-    threshold = timedelta(days=7)
+    # Rule 1: INTERVIEW_SCHEDULED SLA
+    interview_threshold = timedelta(days=7)
+    # Rule 2: SHORTLISTED SLA (New Invariant)
+    shortlist_threshold = timedelta(days=3)
+    
     now = datetime.utcnow()
     
     for cid, state in candidate_state.items():
-        if state['status'] == 'INTERVIEW_SCHEDULED':
-            time_in_stage = now - state['time']
-            if time_in_stage > threshold:
-                # Deduplication check
-                already_alerted = any(
-                    a['entity_id'] == cid and a['alert_type'] == 'SLA_BREACH_STUCK'
-                    for a in alerts
-                )
-                
-                if not already_alerted:
-                    alert = Alert(
-                        alert_id=str(uuid.uuid4()),
-                        tenant_id=tenant_id,
-                        alert_type="SLA_BREACH_STUCK",
-                        severity="CRITICAL",
-                        entity_id=cid,
-                        reason=f"SLA Breach: Candidate stuck in INTERVIEW for {time_in_stage.days} days",
-                        triggered_at=now,
-                        metadata={
-                            "days_in_stage": time_in_stage.days,
-                            "threshold_days": 7
-                        }
-                    )
-                    save_alert(alert)
+        time_in_stage = now - state['time']
+        alert_type = "SLA_BREACH_STUCK"
+        
+        if state['status'] == 'INTERVIEW_SCHEDULED' and time_in_stage > interview_threshold:
+            reason = f"SLA Breach: Candidate stuck in INTERVIEW for {time_in_stage.days} days"
+            trigger_alert(tenant_id, cid, reason, time_in_stage.days, 7, alerts)
+            
+        elif state['status'] == 'SHORTLISTED' and time_in_stage > shortlist_threshold:
+            reason = f"SLA Breach: Candidate shortlisted but no action for {time_in_stage.days} days"
+            trigger_alert(tenant_id, cid, reason, time_in_stage.days, 3, alerts)
+
+def trigger_alert(tenant_id, entity_id, reason, days, threshold, existing_alerts):
+    # Deduplication check
+    already_alerted = any(
+        a['entity_id'] == entity_id and a['reason'] == reason
+        for a in existing_alerts
+    )
+    
+    if not already_alerted:
+        alert = Alert(
+            alert_id=str(uuid.uuid4()),
+            tenant_id=tenant_id,
+            alert_type="SLA_BREACH_STUCK",
+            severity="CRITICAL",
+            entity_id=entity_id,
+            reason=reason,
+            triggered_at=datetime.utcnow(),
+            metadata={
+                "days_in_stage": days,
+                "threshold_days": threshold
+            }
+        )
+        save_alert(alert)
 
 def run_rules():
     print("Running Global Rule Evaluation across all tenants...")
@@ -53,4 +65,5 @@ def run_rules():
     for tenant_id in tenants:
         print(f" - Processing Tenant: {tenant_id}")
         check_stuck_candidates_for_tenant(tenant_id)
+
 

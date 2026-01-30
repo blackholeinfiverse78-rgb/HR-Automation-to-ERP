@@ -1,0 +1,12 @@
+{
+    "event_id": "550e8400-e29b-41d4-a716-446655440000",
+    "tenant_id": "acme_corp",
+    "idempotency_key": "shortlist_cand_123_uuid",
+    "entity_type": "candidate",
+    "entity_id": "cand_123",
+    "action": "SHORTLISTED",
+    "actor_id": "rec_001",
+    "actor_role": "RECRUITER",
+    "timestamp": "2026-01-30T10:00:00Z",
+    "payload": {}
+}

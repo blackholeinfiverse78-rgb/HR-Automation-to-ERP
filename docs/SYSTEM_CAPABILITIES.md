@@ -16,3 +16,8 @@
 ## Success Metric
 - **Zero Duplicate ERP Signals**: Verified by Idempotency keys.
 - **Zero Tenant Leaks**: Verified by strict path-based storage isolation.
+
+## Day 1 Integration Hardening (Completed)
+- **Mandatory Tenant Context**: All event contracts (SHORTLISTED, CANDIDATE_STUCK, EMPLOYEE_CREATED) now require `tenant_id`.
+- **Real SLA Invariants**: Replaced placeholder alerts with real state-check logic (e.g., Shortlisted for > 3 days).
+- **Restart-Safe Idempotency**: ERP signals are persisted and checked before re-emission, ensuring zero duplicates even after a full system restart.
