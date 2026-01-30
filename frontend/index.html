@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HR Automation Command Center v2</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #020617;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent: #3b82f6;
+            --accent-hover: #60a5fa;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --border: rgba(51, 65, 85, 0.5);
+            --glass-bg: rgba(15, 23, 42, 0.8);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: radial-gradient(circle at top left, #0f172a, #020617);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            min-height: 100vh;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            padding: 1.5rem 2rem;
+            border-radius: 1rem;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(to right, #60a5fa, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .tenant-controls {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .select-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .select-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        select {
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+            border: 1px solid var(--border);
+            padding: 0.4rem 0.8rem;
+            border-radius: 0.5rem;
+            outline: none;
+            font-family: inherit;
+        }
+
+        .role-badge {
+            background: rgba(59, 130, 246, 0.2);
+            color: var(--accent);
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            flex-grow: 1;
+        }
+
+        .panel {
+            background: var(--card-bg);
+            backdrop-filter: blur(8px);
+            border-radius: 1rem;
+            border: 1px solid var(--glass-border);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            max-height: 600px;
+            transition: transform 0.2s ease;
+        }
+
+        .panel:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.25rem;
+        }
+
+        .panel-title {
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+        }
+
+        .log-container {
+            flex-grow: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            padding-right: 0.5rem;
+        }
+
+        .log-item {
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 0.75rem;
+            border-left: 4px solid var(--text-secondary);
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .log-item.event {
+            border-left-color: var(--accent);
+        }
+
+        .log-item.alert {
+            border-left-color: var(--danger);
+            background: rgba(239, 68, 68, 0.05);
+        }
+
+        .log-item.erp {
+            border-left-color: var(--success);
+        }
+
+        .log-meta {
+            color: var(--text-secondary);
+            font-size: 0.65rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            font-family: monospace;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            padding: 1.5rem;
+            background: var(--glass-bg);
+            border-radius: 1rem;
+            border: 1px solid var(--glass-border);
+        }
+
+        button {
+            background: rgba(30, 41, 59, 0.5);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        button:hover {
+            background: rgba(51, 65, 85, 0.8);
+            transform: translateY(-1px);
+        }
+
+        button.primary {
+            background: var(--accent);
+            border: none;
+        }
+
+        button.primary:hover {
+            background: var(--accent-hover);
+        }
+
+        button.trigger {
+            background: linear-gradient(135deg, #4f46e5, #9333ea);
+            border: none;
+            box-shadow: 0 4px 14px 0 rgba(79, 70, 229, 0.39);
+        }
+
+        .idempotency-key {
+            font-size: 0.6rem;
+            color: var(--text-secondary);
+            opacity: 0.5;
+            margin-top: 0.5rem;
+            font-family: monospace;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 10px;
+        }
+
+        #explanation-content {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            border: 1px dashed var(--border);
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div>
+            <h1>HR Bridge <span style="font-weight: 300; opacity: 0.7;">v2.0</span></h1>
+            <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.25rem;">
+                Enterprise Automation & ERP Sync Engine
+            </div>
+        </div>
+        <div class="tenant-controls">
+            <div class="select-wrapper">
+                <span class="select-label">Active Tenant</span>
+                <select id="tenant-selector" onchange="onTenantChange()">
+                    <option value="tenant_default">Global Default</option>
+                    <option value="tenant_acme">Acme Corp</option>
+                    <option value="tenant_globex">Globex Inc</option>
+                </select>
+            </div>
+            <div class="select-wrapper">
+                <span class="select-label">User Role</span>
+                <span class="role-badge">SYSTEM_ADMIN</span>
+            </div>
+            <div style="text-align: right;">
+                <div style="font-size: 0.75rem; color: var(--success); font-weight: 600;">● Engine Online</div>
+                <div style="font-size: 0.65rem; color: var(--text-secondary);">Persistence: JSON_MMAP</div>
+            </div>
+        </div>
+    </header>
+
+    <div class="controls">
+        <button onclick="simulateShortlist()">
+            <span>👤</span> Shortlist
+        </button>
+        <button onclick="simulateInterview()">
+            <span>📅</span> Int. Scheduled
+        </button>
+        <button onclick="simulateStuckCandidate()" style="border-color: var(--warning); color: var(--warning);">
+            <span>⚠️</span> SLA Violation Demo
+        </button>
+        <button class="trigger" onclick="runProcessing()">
+            <span>⚡</span> RUN SYNC PIPELINE
+        </button>
+        <button onclick="simulateHire()" style="border-color: var(--success); color: var(--success);">
+            <span>🤝</span> Hire & Sync ERP
+        </button>
+    </div>
+
+    <div class="dashboard-grid">
+        <div class="panel">
+            <div class="panel-header">
+                <span class="panel-title" style="color: var(--accent);">Audit Events</span>
+                <div class="indicator" style="background-color: var(--accent);"></div>
+            </div>
+            <div class="log-container" id="events-log"></div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-header">
+                <span class="panel-title" style="color: var(--danger);">System Alerts</span>
+                <div class="indicator" style="background-color: var(--danger);"></div>
+            </div>
+            <div class="log-container" id="alerts-log"></div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-header">
+                <span class="panel-title" style="color: var(--success);">ERP Signals</span>
+                <div class="indicator" style="background-color: var(--success);"></div>
+            </div>
+            <div class="log-container" id="erp-log"></div>
+        </div>
+    </div>
+
+    <div class="panel" style="max-height: none;">
+        <div class="panel-header">
+            <span class="panel-title" style="color: #a855f7;">Deterministic Proof of Action (Trace)</span>
+        </div>
+        <div id="explanation-content">
+            Select an entity trace to view the deterministic reason for this state.
+        </div>
+    </div>
+
+    <script>
+        const API_URL = "http://localhost:8000";
+        let CURRENT_TENANT = localStorage.getItem('tenant_id') || 'tenant_default';
+        document.getElementById('tenant-selector').value = CURRENT_TENANT;
+
+        function onTenantChange() {
+            CURRENT_TENANT = document.getElementById('tenant-selector').value;
+            localStorage.setItem('tenant_id', CURRENT_TENANT);
+            refreshAll();
+        }
+
+        async function apiCall(path, method = 'GET', body = null) {
+            const url = new URL(`${API_URL}${path}`);
+            if (method === 'GET') {
+                url.searchParams.append('tenant_id', CURRENT_TENANT);
+            }
+
+            const options = {
+                method,
+                headers: { 'Content-Type': 'application/json' }
+            };
+            if (body) options.body = JSON.stringify({ ...body, tenant_id: CURRENT_TENANT });
+
+            const res = await fetch(url.toString(), options);
+            return res.json();
+        }
+
+        async function simulateShortlist() {
+            const id = Math.floor(Math.random() * 1000);
+            await apiCall('/actions/shortlist', 'POST', {
+                candidate_id: `cand_${id}`,
+                recruiter_id: "rec_99",
+                idempotency_key: `idemp_${Date.now()}`
+            });
+            refreshAll();
+        }
+
+        async function simulateInterview() {
+            const id = Math.floor(Math.random() * 1000);
+            await apiCall('/actions/interview', 'POST', {
+                candidate_id: `cand_${id}`,
+                recruiter_id: "rec_99",
+                time_slot: new Date().toISOString()
+            });
+            refreshAll();
+        }
+
+        async function simulateStuckCandidate() {
+            const id = Math.floor(Math.random() * 1000);
+            await apiCall('/actions/debug/stuck-candidate', 'POST', {
+                candidate_id: `cand_stuck_${id}`,
+                recruiter_id: "rec_system"
+            });
+            refreshAll();
+        }
+
+        async function simulateHire() {
+            const id = Math.floor(Math.random() * 1000);
+            await apiCall('/actions/hire', 'POST', {
+                candidate_id: `cand_${id}`,
+                recruiter_id: "rec_99"
+            });
+            refreshAll();
+        }
+
+        async function runProcessing() {
+            await apiCall('/system/process', 'POST');
+            refreshAll();
+        }
+
+        async function explainEntity(entityId) {
+            const content = document.getElementById('explanation-content');
+            content.innerHTML = "Tracing event lineage...";
+            try {
+                const data = await apiCall(`/explain/${entityId}`);
+                content.innerHTML = `
+                    <div style="background: rgba(168, 85, 247, 0.05); padding: 1rem; border-radius: 0.5rem; border: 1px solid rgba(168, 85, 247, 0.2);">
+                        <div style="font-weight: 600; color: #a855f7; margin-bottom: 0.5rem;">PROOF OF REASONING</div>
+                        <div style="font-size: 1.1rem; margin-bottom: 1rem;">${data.explanation}</div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; font-size: 0.8rem; color: var(--text-secondary);">
+                            <div><strong>Tenant:</strong> ${data.tenant_id}</div>
+                            <div><strong>Event Chain:</strong> ${data.raw_events_count} Steps</div>
+                            <div><strong>Alert Evidence:</strong> ${data.raw_alerts_count} Signals</div>
+                            <div><strong>Isolation:</strong> VERIFIED</div>
+                        </div>
+                    </div>
+                `;
+            } catch (e) {
+                content.innerHTML = "Trace failed.";
+            }
+        }
+
+        function renderLog(elementId, data, type) {
+            const container = document.getElementById(elementId);
+            container.innerHTML = '';
+            [...data].reverse().slice(0, 10).forEach(item => {
+                const div = document.createElement('div');
+                div.className = `log-item ${type}`;
+
+                let title, details, time, entity_id, idemp;
+                entity_id = item.entity_id;
+
+                if (type === 'event') {
+                    title = item.action;
+                    details = `${item.entity_type} -> ${item.entity_id}`;
+                    time = new Date(item.timestamp).toLocaleTimeString();
+                    idemp = item.idempotency_key;
+                } else if (type === 'alert') {
+                    title = item.alert_type;
+                    details = item.reason;
+                    time = new Date(item.triggered_at).toLocaleTimeString();
+                } else if (type === 'erp') {
+                    title = item.event_type;
+                    details = `Contract v${item.contract_version} | ID: ${item.entity_id}`;
+                    time = "SYNCED";
+                }
+
+                div.innerHTML = `
+                    <div class="log-meta">
+                        <span>${time}</span>
+                        <span>v2.0_READY</span>
+                    </div>
+                    <div style="font-weight:600; color: var(--text-primary); display:flex; justify-content:space-between; align-items:center; margin-bottom: 0.25rem;">
+                        <span>${title}</span>
+                        <a href="#" onclick="explainEntity('${entity_id}'); return false;" style="color: #a855f7; font-size: 0.65rem; text-decoration:none; font-weight: 700;">TRACE ➔</a>
+                    </div>
+                    <div style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4;">${details}</div>
+                    ${idemp ? `<div class="idempotency-key">IK: ${idemp}</div>` : ''}
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        async function refreshAll() {
+            try {
+                const [events, alerts, erp] = await Promise.all([
+                    apiCall('/events'),
+                    apiCall('/alerts'),
+                    apiCall('/erp-signals')
+                ]);
+                renderLog('events-log', events, 'event');
+                renderLog('alerts-log', alerts, 'alert');
+                renderLog('erp-log', erp, 'erp');
+            } catch (e) {
+                console.error("Link severed", e);
+            }
+        }
+
+        setInterval(refreshAll, 3000);
+        refreshAll();
+    </script>
+</body>
+
+</html>

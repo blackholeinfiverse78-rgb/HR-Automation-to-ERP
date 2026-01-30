@@ -1,0 +1,14 @@
+[
+  {
+    "event_id": "d9c70bc0-2b80-4146-b2e9-1b0238cb3698",
+    "tenant_id": "globex_inc",
+    "idempotency_key": "5e429a81-211b-4348-ae4d-127e17735725",
+    "entity_type": "candidate",
+    "entity_id": "cand_stuck_globex",
+    "action": "INTERVIEW_SCHEDULED",
+    "actor_id": "SYSTEM_DEBUG",
+    "actor_role": "DEBUG_SYSTEM",
+    "timestamp": "2026-01-20 06:26:05.202268",
+    "payload": {}
+  }
+]

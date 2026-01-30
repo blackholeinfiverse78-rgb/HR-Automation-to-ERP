@@ -1,0 +1,15 @@
+[
+  {
+    "alert_id": "3ddb5e63-9bd3-4add-87ac-d65614b72c68",
+    "tenant_id": "globex_inc",
+    "alert_type": "SLA_BREACH_STUCK",
+    "severity": "CRITICAL",
+    "entity_id": "cand_stuck_globex",
+    "reason": "SLA Breach: Candidate stuck in INTERVIEW for 10 days",
+    "triggered_at": "2026-01-30 06:26:07.250533",
+    "metadata": {
+      "days_in_stage": 10,
+      "threshold_days": 7
+    }
+  }
+]
